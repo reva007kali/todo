@@ -1,36 +1,11 @@
-const CACHE_NAME = 'task-manager-v1';
-
-self.addEventListener("install", event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll([
-                "/offline.html",
-                "/icons/icon-192x192.png",
-                "/icons/icon-512x512.png",
-            ]);
-        })
-    );
-});
-
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(names => {
-            return Promise.all(
-                names.map(name => {
-                    if (name !== CACHE_NAME) return caches.delete(name);
-                })
-            );
-        })
-    );
-});
-
 self.addEventListener('push', event => {
-    const data = event.data.json();
-
+    const data = event.data ? event.data.json() : { title: 'Task Reminder', body: 'You have a task.' };
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
-            data: { url: data.url || "/" }
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-192x192.png',
+            data: { url: data.url || '/' }
         })
     );
 });
@@ -38,6 +13,11 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow(event.notification.data.url)
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            for (let client of windowClients) {
+                if (client.url === event.notification.data.url && 'focus' in client) return client.focus();
+            }
+            if (clients.openWindow) return clients.openWindow(event.notification.data.url);
+        })
     );
 });

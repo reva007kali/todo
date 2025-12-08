@@ -46,3 +46,27 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
+
+Route::post('/push-subscribe', function (Request $request) {
+    $request->validate([
+        'endpoint'    => 'required|string',
+        'keys.p256dh' => 'required|string',
+        'keys.auth'   => 'required|string'
+    ]);
+
+    $user = $request->user();
+
+    if (! $user) {
+        return response()->json(['error' => 'User not logged in'], 401);
+    }
+
+    $user->updatePushSubscription(
+        $request->endpoint,
+        $request->input('keys.p256dh'),
+        $request->input('keys.auth')
+    );
+
+    return response()->json(['success' => true]);
+})->middleware('auth');
+
+

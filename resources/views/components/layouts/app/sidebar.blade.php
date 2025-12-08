@@ -124,70 +124,72 @@
     </flux:header>
 
     {{ $slot }}
-    @auth
-        <button id="notif-btn" style="display:none; padding:10px 20px; background:#4f46e5; color:white; border-radius:8px;">
-            Aktifkan Notifikasi
-        </button>
-    @endauth
+    <button id="notif-btn" style="display:none">Aktifkan Notifikasi</button>
 
-
-    @fluxScripts
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
+        async function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.log('Push Notification tidak didukung.');
+                console.log('Push not supported');
                 return;
             }
 
-            // Register SW
-            const reg = await navigator.serviceWorker.register("/sw.js");
-            console.log("ServiceWorker terdaftar:", reg);
+            try {
+                // Register SW
+                await navigator.serviceWorker.register('/sw.js');
+                console.log('SW registered');
 
-            const sub = await reg.pushManager.getSubscription();
+                const reg = await navigator.serviceWorker.ready;
+                const existing = await reg.pushManager.getSubscription();
 
-            if (!sub) {
-                document.getElementById("notif-btn").style.display = "block";
+                // Show button only if not subscribed
+                const btn = document.getElementById('notif-btn');
+                if (!existing) btn.style.display = 'inline-block';
+                else console.log('Already subscribed');
+
+                btn.addEventListener('click', async () => {
+                    try {
+                        const publicKey = window.VAPID_PUBLIC_KEY;
+                        const sub = await reg.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array(publicKey)
+                        });
+
+                        // Send subscription to server
+                        await fetch('/push-subscribe', {
+                            method: 'POST',
+                            credentials: 'same-origin', // <--- CRUCIAL: send session cookie
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(sub)
+                        });
+
+                        btn.style.display = 'none';
+                        alert('Notifikasi aktif!');
+                    } catch (err) {
+                        console.error('Subscribe failed', err);
+                        alert('Gagal subscribe: ' + (err.message || err));
+                    }
+                });
+
+            } catch (e) {
+                console.error('SW register error', e);
             }
         });
     </script>
-    <script>
-        document.getElementById("notif-btn").addEventListener("click", async () => {
-            const publicKey = "{{ env('VAPID_PUBLIC_KEY') }}";
 
-            const reg = await navigator.serviceWorker.ready;
 
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicKey),
-            });
 
-            console.log("SUBSCRIPTION BERHASIL:", sub);
-
-            // Kirim ke backend
-            await fetch("/api/push-subscribe", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content
-                },
-                body: JSON.stringify(sub),
-            });
-
-            alert("Notifikasi aktif!");
-            document.getElementById("notif-btn").style.display = "none";
-        });
-
-        function urlBase64ToUint8Array(base64String) {
-            const padding = "=".repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
-            const rawData = atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-    </script>
+    @fluxScripts
 
 
 </body>
