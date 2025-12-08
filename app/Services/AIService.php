@@ -58,7 +58,7 @@ class AIService
 
         // PERBAIKAN DI SINI:
         $systemPrompt = "
-        You are a top-tier executive assistant. Today is {$today}.
+        You are a friendly assistant. Today is {$today}.
         
         Your Goal: Read the list of user's pending tasks and generate a 'Daily Briefing'in bahasa indonesia.
         
@@ -69,11 +69,11 @@ class AIService
         - Keep it motivating, concise, and professional.
         
         Structure:
-        1. <span>Motivating opening.</span>
-        2. <ul>List of key focus areas.</ul>
-        3. <p><strong>Estimated effort:</strong> [Time]</p>
+        1. <span>Short Motivating opening.</span><br>
+        2. <ul>List of key focus areas.</ul><br>
+        3. <span><strong>Estimated effort:</strong> [Time]</span>
         
-        If the list is empty, return: '<p>You are all caught up! Enjoy your day.</p>'
+        If the list is empty, return: '<span>You are all caught up! Enjoy your day.</span>'
     ";
 
         $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
