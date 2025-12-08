@@ -125,6 +125,8 @@
 
     {{ $slot }}
 
+    <button id="enable-push">Enable Notification</button>
+
     @fluxScripts
     <script>
         if ('serviceWorker' in navigator) {
@@ -137,6 +139,12 @@
                     });
             });
         }
+
+        document.getElementById('enable-push').addEventListener('click', () => {
+            window.LaravelWebPush.subscribe()
+                .then(() => alert("Notifications enabled!"))
+                .catch(err => console.error("Subscription failed:", err));
+        });
     </script>
 </body>
 
