@@ -31,50 +31,18 @@ self.addEventListener('activate', event => {
     );
 });
 
-// 3. FETCH STRATEGY (Network First, fallback to Cache)
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        fetch(event.request)
-            .catch(() => {
-                return caches.match(event.request)
-                    .then(response => {
-                        // Jika ada di cache (misal css/js), kembalikan
-                        if (response) return response;
-                        
-                        // Jika request halaman (HTML) dan offline, tampilkan halaman offline custom
-                        if (event.request.headers.get('accept').includes('text/html')) {
-                            return caches.match('/offline');
-                        }
-                    });
-            })
-    );
-});
 
 // 4. HANDLE PUSH NOTIFICATION (PENTING!)
-self.addEventListener('push', function (event) {
-    if (!(self.Notification && self.Notification.permission === 'granted')) {
-        return;
-    }
-
-    const payload = event.data ? event.data.json() : {};
-    const title = payload.title || 'Task Reminder';
-    const options = {
-        body: payload.body || 'Cek tugas kamu sekarang!',
-        icon: '/images/icons/icon-192x192.png',
-        badge: '/images/icons/icon-192x192.png',
-        vibrate: [100, 50, 100],
-        data: {
-            url: payload.action_url || '/'
-        },
-        actions: [
-            { action: 'open', title: 'Buka Aplikasi' }
-        ]
-    };
+self.addEventListener('push', event => {
+    const data = event.data.json();
 
     event.waitUntil(
-        self.registration.showNotification(title, options)
+        self.registration.showNotification(data.title, {
+            body: data.body,
+        })
     );
 });
+
 
 // 5. HANDLE NOTIFICATION CLICK
 self.addEventListener('notificationclick', function (event) {
