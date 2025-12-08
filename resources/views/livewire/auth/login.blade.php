@@ -59,7 +59,9 @@
                 <!-- Testimonial / Quote Area -->
                 <div class="space-y-6 max-w-lg animate-slide-up" style="animation-delay: 0.2s;">
                     <blockquote class="text-2xl font-medium text-white">
-                        “This isn’t just another to-do app — it’s your AI-backed productivity sidekick. It predicts, prioritizes, organizes, and keeps you on track even when life gets messy. You handle the vision, it handles the workload.”
+                        “This isn’t just another to-do app — it’s your AI-backed productivity sidekick. It predicts,
+                        prioritizes, organizes, and keeps you on track even when life gets messy. You handle the vision,
+                        it handles the workload.”
                     </blockquote>
                     <div class="flex items-center gap-4">
                         <img class="h-12 w-12 rounded-full ring-2 ring-white/20"
@@ -242,7 +244,7 @@
                                 Not a member?
                                 <a href="{{ route('register') }}" wire:navigate
                                     class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
-                                     Sign up now
+                                    Sign up now
                                 </a>
                             </p>
                         @endif
@@ -251,7 +253,19 @@
             </div>
         </div>
     </div>
-        @fluxScripts
+    @fluxScripts
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    }, function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 
 </body>
 

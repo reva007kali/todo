@@ -13,30 +13,31 @@ class AIService
 
         // Instruksi kita perjelas untuk Priority
         $systemPrompt = "
-            You are a smart personal assistant. 
-            Current Date/Time: {$today}.
-            
-            Analyze the user input and extract task details into a valid JSON object.
-            
-            Rules for extraction:
-            1. Title: A short summary of the task.
-            2. Description: Detailed info (if any).
-            3. Due Date: Format 'YYYY-MM-DD HH:mm:ss'. If time is not specified, assume 09:00:00. If no date, set null.
-            4. Priority: Analyze the urgency based on words like 'urgent', 'penting', 'segera', 'asap', 'darurat'.
-               - If urgent/important -> 'High'
-               - If standard/casual -> 'Middle'
-               - If trivial/later -> 'Low'
-               - Default to 'Low' if unsure.
-               - Allowed values: 'Low', 'Middle', 'High'.
-            
-            Return ONLY this JSON structure:
-            {
-                'title': 'string',
-                'description': 'string',
-                'priority': 'string',
-                'due_date': 'string or null'
-            }
-        ";
+           Anda adalah asisten pribadi yang cerdas. 
+            Tanggal/Waktu Saat Ini: {$today}.
+
+            Analisis input pengguna dan ekstrak detail tugas menjadi objek JSON yang valid.
+
+            Aturan ekstraksi:
+            1. Title: Ringkasan singkat dari tugas.
+            2. Description: Informasi detail (jika ada).
+            3. Due Date: Format 'YYYY-MM-DD HH:mm:ss'. Jika waktu tidak disebutkan, gunakan 09:00:00. Jika tidak ada tanggal, set null.
+            4. Priority: Analisis urgensi berdasarkan kata seperti 'urgent', 'penting', 'segera', 'asap', 'darurat'.
+            - Jika mendesak/penting -> 'High'
+             - Jika standar/biasa -> 'Middle'
+             - Jika sepele/nanti saja -> 'Low'
+              - Default 'Low' jika tidak yakin.
+              - Nilai yang diperbolehkan: 'Low', 'Middle', 'High'.
+
+            Kembalikan HANYA struktur JSON berikut:
+                        {
+                        'title': 'string',
+                         'description': 'string',
+                         'priority': 'string',
+                         'due_date': 'string or null'
+                          }
+
+             ";
 
         $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
             'model' => 'gpt-4o-mini',
@@ -61,17 +62,6 @@ class AIService
         You are a friendly assistant. Today is {$today}.
         
         Your Goal: Read the list of user's pending tasks and generate a 'Daily Briefing'in bahasa indonesia.
-        
-        Output format: 
-        - Use simple HTML tags only (<span>, <ul>, <li>, <strong>, <br>).
-        - Do NOT use <html>, <head>, <body>, or <!DOCTYPE>.
-        - Do NOT use Markdown (no # or *).
-        - Keep it motivating, concise, and professional.
-        
-        Structure:
-        1. <span>Short Motivating opening.</span><br>
-        2. <ul>List of key focus areas.</ul><br>
-        3. <span><strong>Estimated effort:</strong> [Time]</span>
         
         If the list is empty, return: '<span>You are all caught up! Enjoy your day.</span>'
     ";

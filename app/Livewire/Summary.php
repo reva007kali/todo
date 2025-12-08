@@ -79,7 +79,7 @@ class Summary extends Component
             // Atau kita buat string prompt di sini
             $prompt = "Berikut adalah daftar tugas saya:\n" . $taskListString . "\n\n" .
                 "1. Berikan ringkasan singkat (maksimal 3 kalimat) tentang apa yang harus saya selesaikan segera berdasarkan prioritas dan deadline.\n" .
-                "2. Berikan 1 tips produktivitas random yang unik dan actionable (tidak klise) untuk hari ini. Pisahkan output dengan delimiter '|||'.";
+                "2. Berikan 1 tips produktivitas . Pisahkan output dengan delimiter wajib = '|||'.";
 
             // Kita anggap service mengembalikan raw text
             $response = $aiService->generateBriefing($prompt);
