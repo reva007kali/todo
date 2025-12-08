@@ -1,5 +1,6 @@
 <?php
 
+// routes/web.php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,7 +11,7 @@ Route::post('/push-subscribe', function (Request $request) {
         'keys.p256dh' => 'required'
     ]);
 
-    $user = $request->user();
+    $user = $request->user(); // <-- bakal kebaca
 
     if ($user) {
         $user->updatePushSubscription(
@@ -18,9 +19,10 @@ Route::post('/push-subscribe', function (Request $request) {
             $request->keys['p256dh'],
             $request->keys['auth']
         );
+
         return response()->json(['success' => true]);
     }
-    
+
     return response()->json(['error' => 'User not logged in'], 401);
 
-})->middleware('web'); // <--- PENTING: Ganti ke 'web' dulu biar kebaca session login-nya
+})->middleware('auth'); // kalau pakai Fortify
