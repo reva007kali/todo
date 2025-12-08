@@ -38,7 +38,16 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         fetch(event.request)
             .catch(() => {
-                return caches.match(event.request);
+                return caches.match(event.request)
+                    .then(response => {
+                        // Jika ada di cache (misal css/js), kembalikan
+                        if (response) return response;
+                        
+                        // Jika request halaman (HTML) dan offline, tampilkan halaman offline custom
+                        if (event.request.headers.get('accept').includes('text/html')) {
+                            return caches.match('/offline');
+                        }
+                    });
             })
     );
 });
