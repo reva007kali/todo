@@ -52,12 +52,12 @@ class AIService
     }
 
     public function generateBriefing($tasksList)
-{
-    $apiKey = env('OPENAI_API_KEY');
-    $today = now()->format('l, d F Y');
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        $today = now()->format('l, d F Y');
 
-    // PERBAIKAN DI SINI:
-    $systemPrompt = "
+        // PERBAIKAN DI SINI:
+        $systemPrompt = "
         You are a top-tier executive assistant. Today is {$today}.
         
         Your Goal: Read the list of user's pending tasks and generate a 'Daily Briefing'.
@@ -76,14 +76,14 @@ class AIService
         If the list is empty, return: '<p>You are all caught up! Enjoy your day.</p>'
     ";
 
-    $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
-        'model' => 'gpt-4o-mini',
-        'messages' => [
-            ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Here are my pending tasks:\n" . $tasksList],
-        ],
-    ]);
+        $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => "Here are my pending tasks:\n" . $tasksList],
+            ],
+        ]);
 
-    return $response->json()['choices'][0]['message']['content'];
-}
+        return $response->json()['choices'][0]['message']['content'];
+    }
 }

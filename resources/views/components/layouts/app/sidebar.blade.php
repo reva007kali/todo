@@ -5,7 +5,7 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body class="min-h-screen bg-gray-200 dark:bg-zinc-900">
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
@@ -20,7 +20,7 @@
                 <flux:navlist.item icon="list-bullet" :href="route('tasks.index')"
                     :current="request()->routeIs('tasks.index')" wire:navigate>{{ __('Task List') }}</flux:navlist.item>
                 <flux:navlist.item icon="megaphone" :href="route('summary.index')"
-                    :current="request()->routeIs('summary.index')" wire:navigate>{{ __('Your Summary') }}
+                    :current="request()->routeIs('summary.index')" wire:navigate>{{ __('Task Summary') }}
                 </flux:navlist.item>
             </flux:navlist.group>
         </flux:navlist>
@@ -35,7 +35,7 @@
 
         <!-- Desktop User Menu -->
         <flux:dropdown class="hidden lg:block" position="bottom" align="start">
-            <flux:profile :name="auth()->user()->name" :initials="auth()->user()->initials()"
+            <flux:profile circle :name="auth()->user()->name" :initials="auth()->user()->initials()"
                 icon:trailing="chevrons-up-down" />
 
             <flux:menu class="w-[220px]">
@@ -44,7 +44,7 @@
                         <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                             <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                 <span
-                                    class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                     {{ auth()->user()->initials() }}
                                 </span>
                             </span>
@@ -77,7 +77,7 @@
     </flux:sidebar>
 
     <!-- Mobile User Menu -->
-    <flux:header class="lg:hidden">
+    <flux:header sticky class="lg:hidden backdrop-blur-xl dark:!bg-zinc-900 py-1.5 border-b border-white/20">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <flux:spacer />

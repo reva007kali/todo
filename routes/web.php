@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('login');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')

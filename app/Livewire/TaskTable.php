@@ -9,18 +9,21 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskTable extends Component
 {
-
     use WithPagination;
 
+    // Filter State
     public $search = '';
+    public $filterStatus = 'all';   // 'all', 'pending', 'completed'
+    public $filterPriority = 'all'; // 'all', 'High', 'Middle', 'Low'
+    
+    // Sorting State
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
 
-    // Reset halaman ke 1 saat user mengetik search
-    public function updatedSearch()
-    {
-        $this->resetPage();
-    }
+    // Reset pagination saat filter berubah
+    public function updatedSearch() { $this->resetPage(); }
+    public function updatedFilterStatus() { $this->resetPage(); }
+    public function updatedFilterPriority() { $this->resetPage(); }
 
     public function sortBy($field)
     {
@@ -63,10 +66,29 @@ class TaskTable extends Component
 
     public function render()
     {
-        $tasks = Task::where('user_id', Auth::id())
-            ->where('title', 'like', '%' . $this->search . '%') // Fitur Search
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(10); // 10 data per halaman
+        $query = Task::where('user_id', Auth::id());
+
+        // 1. Search Logic (Title OR Description)
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 2. Filter Status
+        $query->when($this->filterStatus !== 'all', function ($q) {
+            $q->where('status', $this->filterStatus);
+        });
+
+        // 3. Filter Priority
+        $query->when($this->filterPriority !== 'all', function ($q) {
+            $q->where('priority', $this->filterPriority);
+        });
+
+        // 4. Sorting & Pagination
+        $tasks = $query->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(10);
 
         return view('livewire.task-table', [
             'tasks' => $tasks
