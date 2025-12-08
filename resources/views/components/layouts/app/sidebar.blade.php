@@ -124,71 +124,9 @@
     </flux:header>
 
     {{ $slot }}
-    @auth
-        <button id="notif-btn" style="display:none; padding:10px 20px; background:#4f46e5; color:white; border-radius:8px;">
-            Aktifkan Notifikasi
-        </button>
-    @endauth
 
 
     @fluxScripts
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.log('Push Notification tidak didukung.');
-                return;
-            }
-
-            // Register SW
-            const reg = await navigator.serviceWorker.register("/sw.js");
-            console.log("ServiceWorker terdaftar:", reg);
-
-            const sub = await reg.pushManager.getSubscription();
-
-            if (!sub) {
-                document.getElementById("notif-btn").style.display = "block";
-            }
-        });
-    </script>
-    <script>
-        document.getElementById("notif-btn").addEventListener("click", async () => {
-            const publicKey = "{{ env('VAPID_PUBLIC_KEY') }}";
-
-            const reg = await navigator.serviceWorker.ready;
-
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicKey),
-            });
-
-            console.log("SUBSCRIPTION BERHASIL:", sub);
-
-            // Kirim ke backend
-            await fetch("/api/push-subscribe", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content
-                },
-                body: JSON.stringify(sub),
-            });
-
-            alert("Notifikasi aktif!");
-            document.getElementById("notif-btn").style.display = "none";
-        });
-
-        function urlBase64ToUint8Array(base64String) {
-            const padding = "=".repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
-            const rawData = atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-    </script>
-
 
 </body>
 
