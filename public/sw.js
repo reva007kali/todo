@@ -1,51 +1,41 @@
 const CACHE_NAME = 'task-manager-v1';
-const urlsToCache = [
-    '/offline', // Buat route/view ini jika mau halaman offline custom
-    '/build/assets/app.css', // Sesuaikan dengan build file kamu
-    '/build/assets/app.js',
-];
 
-// 1. INSTALL SW & CACHE ASSETS
-self.addEventListener('install', event => {
+self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
-            })
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll([
+                "/offline.html",
+                "/icons/icon-192x192.png",
+                "/icons/icon-512x512.png",
+            ]);
+        })
     );
 });
 
-// 2. ACTIVATE & CLEAN OLD CACHE
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
+        caches.keys().then(names => {
             return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
+                names.map(name => {
+                    if (name !== CACHE_NAME) return caches.delete(name);
                 })
             );
         })
     );
 });
 
-
-// 4. HANDLE PUSH NOTIFICATION (PENTING!)
 self.addEventListener('push', event => {
     const data = event.data.json();
 
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
+            data: { url: data.url || "/" }
         })
     );
 });
 
-
-// 5. HANDLE NOTIFICATION CLICK
-self.addEventListener('notificationclick', function (event) {
+self.addEventListener('notificationclick', event => {
     event.notification.close();
     event.waitUntil(
         clients.openWindow(event.notification.data.url)
