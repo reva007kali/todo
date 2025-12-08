@@ -21,4 +21,4 @@ Route::post('/push-subscribe', function (Request $request) {
     }
     
     return response()->json(['success' => true]);
-})->middleware('auth:sanctum'); // Atau auth:web jika pakai session biasa
+})->middleware('auth:web'); // Atau auth:web jika pakai session biasa
