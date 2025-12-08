@@ -1,10 +1,8 @@
 const CACHE_NAME = 'task-manager-v1';
 const urlsToCache = [
-    '/',
     '/offline', // Buat route/view ini jika mau halaman offline custom
-    '/css/app.css', // Sesuaikan dengan build file kamu
-    '/js/app.js',
-    '/images/icons/icon-192x192.png'
+    '/build/assets/app.css', // Sesuaikan dengan build file kamu
+    '/build/assets/app.js',
 ];
 
 // 1. INSTALL SW & CACHE ASSETS
