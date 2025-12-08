@@ -126,67 +126,6 @@
     {{ $slot }}
     <button id="notif-btn" style="display:none">Aktifkan Notifikasi</button>
 
-    <script>
-        async function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.log('Push not supported');
-                return;
-            }
-
-            try {
-                // Register SW
-                await navigator.serviceWorker.register('/sw.js');
-                console.log('SW registered');
-
-                const reg = await navigator.serviceWorker.ready;
-                const existing = await reg.pushManager.getSubscription();
-
-                // Show button only if not subscribed
-                const btn = document.getElementById('notif-btn');
-                if (!existing) btn.style.display = 'inline-block';
-                else console.log('Already subscribed');
-
-                btn.addEventListener('click', async () => {
-                    try {
-                        const publicKey = window.VAPID_PUBLIC_KEY;
-                        const sub = await reg.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: urlBase64ToUint8Array(publicKey)
-                        });
-
-                        // Send subscription to server
-                        await fetch('/push-subscribe', {
-                            method: 'POST',
-                            credentials: 'same-origin', // <--- CRUCIAL: send session cookie
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(sub)
-                        });
-
-                        btn.style.display = 'none';
-                        alert('Notifikasi aktif!');
-                    } catch (err) {
-                        console.error('Subscribe failed', err);
-                        alert('Gagal subscribe: ' + (err.message || err));
-                    }
-                });
-
-            } catch (e) {
-                console.error('SW register error', e);
-            }
-        });
-    </script>
-
 
 
     @fluxScripts
