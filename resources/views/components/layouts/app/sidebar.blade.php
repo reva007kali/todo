@@ -11,27 +11,37 @@
 
         <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
             <x-app-logo />
+            <flux:button x-data x-on:click="$flux.dark = ! $flux.dark" icon="moon" variant="subtle" aria-label="Toggle dark mode" />
         </a>
 
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Platform')" class="grid">
+
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+
                 <flux:navlist.item icon="list-bullet" :href="route('tasks.index')"
-                    :current="request()->routeIs('tasks.index')" wire:navigate>{{ __('Task List') }}</flux:navlist.item>
+                    :current="request()->routeIs('tasks.index')" wire:navigate>{{ __('Task List') }}
+                </flux:navlist.item>
+
                 <flux:navlist.item icon="megaphone" :href="route('summary.index')"
                     :current="request()->routeIs('summary.index')" wire:navigate>{{ __('Task Summary') }}
                 </flux:navlist.item>
+
             </flux:navlist.group>
         </flux:navlist>
 
         <flux:spacer />
 
-        <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
-            <flux:radio value="light" icon="sun" />
-            <flux:radio value="dark" icon="moon" />
-            <flux:radio value="system" icon="computer-desktop" />
-        </flux:radio.group>
+        <flux:navlist>
+            <!-- MENU KHUSUS ADMIN -->
+            @if (auth()->check() && auth()->user()->role === 'admin')
+                <flux:navlist.item icon="lock-closed" :href="route('admin.dashboard')"
+                    :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                    {{ __('Admin Panel') }}
+                </flux:navlist.item>
+            @endif
+        </flux:navlist>
 
         <!-- Desktop User Menu -->
         <flux:dropdown class="hidden lg:block" position="bottom" align="start">

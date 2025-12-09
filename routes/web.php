@@ -3,6 +3,7 @@
 use App\Livewire\Summary;
 use App\Livewire\TaskTable;
 use Laravel\Fortify\Features;
+use App\Livewire\AdminDashboard;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\TwoFactor;
@@ -19,6 +20,10 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
+});
 
 Route::get('auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'callback']);

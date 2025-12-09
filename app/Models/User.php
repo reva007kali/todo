@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,6 +28,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // <--- Tambahkan ini
+
     ];
 
     /**
@@ -52,6 +55,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     /**
