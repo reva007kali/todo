@@ -38,6 +38,7 @@ class DashboardManager extends Component
     public function getTasksProperty()
     {
         return Task::where('user_id', Auth::id())
+            ->orderByRaw("CASE WHEN status = 'completed' THEN 1 ELSE 0 END")
             ->orderByRaw("
                    CASE priority 
                        WHEN 'High' THEN 1 
@@ -46,8 +47,6 @@ class DashboardManager extends Component
                        ELSE 4 
                    END
                ")
-            ->orderByRaw("CASE WHEN status = 'completed' THEN 1 ELSE 0 END")
-            // 3. KETIGA: Urutkan berdasarkan tanggal pembuatan terbaru
             ->orderBy('created_at', 'desc')
             ->get();
     }
