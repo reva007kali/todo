@@ -156,7 +156,7 @@
             }
 
             // Kirim subscription ke server
-            await fetch("/api/push-subscribe", {
+            await fetch("/push-subscribe", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

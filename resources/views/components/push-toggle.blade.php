@@ -35,7 +35,7 @@
                     });
 
                     // Kirim ke Backend Laravel
-                    await axios.post('/api/pubsh-subscribe', {
+                    await axios.post('/pubsh-subscribe', {
                         endpoint: sub.endpoint,
                         keys: {
                             p256dh: sub.toJSON().keys.p256dh,
