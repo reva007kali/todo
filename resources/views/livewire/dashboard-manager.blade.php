@@ -41,18 +41,18 @@
         <div class="flex justify-center">
             <div class="bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg flex gap-1">
                 <button wire:click="$set('viewFilter', 'my_tasks')"
-                    class="px-4 py-2 text-sm font-medium rounded-md transition {{ $viewFilter === 'my_tasks' ? 'bg-white dark:bg-zinc-600 shadow text-indigo-600 dark:text-indigo-300' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400' }}">
+                    class="px-4 py-2 text-sm font-medium rounded-md transition {{ $viewFilter == 'my_tasks' ? 'bg-white dark:bg-zinc-600 shadow text-indigo-600 dark:text-indigo-300' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400' }}">
                     Tugas Saya
                 </button>
                 <button wire:click="$set('viewFilter', 'shared')"
-                    class="px-4 py-2 text-sm font-medium rounded-md transition {{ $viewFilter === 'shared' ? 'bg-white dark:bg-zinc-600 shadow text-indigo-600 dark:text-indigo-300' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400' }}">
+                    class="px-4 py-2 text-sm font-medium rounded-md transition {{ $viewFilter == 'shared' ? 'bg-white dark:bg-zinc-600 shadow text-indigo-600 dark:text-indigo-300' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400' }}">
                     Dibagikan ke Saya
                 </button>
             </div>
         </div>
 
         <!-- INPUT SECTION (AI & MANUAL TOGGLE) - HANYA MUNCUL DI MY TASKS -->
-        @if ($viewFilter === 'my_tasks')
+        @if ($viewFilter == 'my_tasks')
             <div class="space-y-4">
                 <!-- AI Input -->
                 <div class="relative group">
@@ -163,7 +163,7 @@
                 <div
                     class="text-center py-12 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
                     <p class="text-zinc-500 dark:text-zinc-400 text-sm">
-                        @if ($viewFilter === 'my_tasks')
+                        @if ($viewFilter == 'my_tasks')
                             Belum ada tugas. Mulai ketik di atas!
                         @else
                             Belum ada tugas yang dibagikan ke Anda.
@@ -174,7 +174,7 @@
                 <div class="flex flex-col gap-3">
                     @foreach ($this->tasks as $task)
                         <div wire:key="task-{{ $task->id }}"
-                            class="bg-white dark:bg-zinc-900 rounded-xl border {{ $expandedTaskId === $task->id ? 'border-blue-500 ring-1 ring-blue-500 shadow-md' : 'border-zinc-200 dark:border-zinc-800 hover:border-indigo-300 dark:hover:border-blue-700' }} transition-all duration-200 overflow-hidden">
+                            class="bg-white dark:bg-zinc-900 rounded-xl border {{ $expandedTaskId == $task->id ? 'border-blue-500 ring-1 ring-blue-500 shadow-md' : 'border-zinc-200 dark:border-zinc-800 hover:border-indigo-300 dark:hover:border-blue-700' }} transition-all duration-200 overflow-hidden">
 
                             <!-- Card Header (Always Visible) -->
                             <div class="p-4 flex items-start gap-4 cursor-pointer {{ $task->status == 'completed' ? 'bg-zinc-50 dark:bg-zinc-900/80' : '' }}"
@@ -198,7 +198,7 @@
                                         <!-- Badges & Tools -->
                                         <div class="flex items-center gap-2 shrink-0">
                                             <!-- NEW: Shared Badge (Jika di tab Shared) -->
-                                            @if ($viewFilter === 'shared')
+                                            @if ($viewFilter == 'shared')
                                                 <span
                                                     class="text-[10px] bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 flex items-center gap-1">
                                                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
@@ -212,7 +212,7 @@
                                             @endif
 
                                             <!-- NEW: Share Button (Hanya jika Pemilik) -->
-                                            @if ($task->user_id === auth()->id())
+                                            @if ($task->user_id == auth()->id())
                                                 <button wire:click.stop="openShareModal({{ $task->id }})"
                                                     class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                                                     title="Bagikan Task">
@@ -231,7 +231,7 @@
                                             </span>
 
                                             <!-- Chevron Icon (Rotates when open) -->
-                                            <svg class="w-5 h-5 text-zinc-400 transition-transform duration-200 {{ $expandedTaskId === $task->id ? 'rotate-180' : '' }}"
+                                            <svg class="w-5 h-5 text-zinc-400 transition-transform duration-200 {{ $expandedTaskId == $task->id ? 'rotate-180' : '' }}"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 9l-7 7-7-7" />
@@ -260,7 +260,7 @@
                             </div>
 
                             <!-- Accordion Body (Editable Form) -->
-                            @if ($expandedTaskId === $task->id)
+                            @if ($expandedTaskId == $task->id)
                                 <div
                                     class="bg-zinc-50 dark:bg-black/20 border-t border-zinc-100 dark:border-zinc-800 p-5 animate-fade-in">
                                     <div class="flex items-center justify-between mb-4">
@@ -309,7 +309,7 @@
                                     <!-- Action Buttons -->
                                     <div class="flex items-center justify-between pt-2">
                                         <!-- Hapus Button: Hanya Muncul Jika Pemilik -->
-                                        @if ($task->user_id === auth()->id())
+                                        @if ($task->user_id == auth()->id())
                                             <button wire:click="confirmDelete({{ $task->id }})" type="button"
                                                 class="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
