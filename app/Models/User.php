@@ -62,6 +62,13 @@ class User extends Authenticatable
         return $this->hasMany(Task::class);
     }
 
+    public function sharedTasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_shares')
+            ->withPivot('permission')
+            ->withTimestamps();
+    }
+
     /**
      * Get the user's initials
      */

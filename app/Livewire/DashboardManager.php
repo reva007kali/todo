@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
+use Carbon\Carbon;
 use App\Models\Task;
+use App\Models\User;
 use Livewire\Component;
 use App\Services\AIService;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class DashboardManager extends Component
 {
@@ -34,9 +35,26 @@ class DashboardManager extends Component
         'due_date' => '',
     ];
 
+    // State untuk Sharing
+    public $shareModalOpen = false;
+    public $taskToShareId = null;
+    public $shareEmail = '';
+    public $sharePermission = 'edit';
+
+    // Filter Tampilan (My Tasks / Shared With Me)
+    public $viewFilter = 'my_tasks'; // 'my_tasks' atau 'shared'
+
     // Computed Property untuk Tasks
     public function getTasksProperty()
     {
+        if ($this->viewFilter === 'shared') {
+            // Ambil task yang dishare KE saya
+            return Auth::user()->sharedTasks()
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        // Ambil task milik saya sendiri (Logic lama)
         return Task::where('user_id', Auth::id())
             ->orderByRaw("CASE WHEN status = 'completed' THEN 1 ELSE 0 END")
             ->orderByRaw("
@@ -50,6 +68,58 @@ class DashboardManager extends Component
             ->orderBy('created_at', 'desc')
             ->get();
     }
+
+    // --- LOGIC SHARING ---
+
+    public function openShareModal($taskId)
+    {
+        $this->taskToShareId = $taskId;
+        $this->shareModalOpen = true;
+        $this->shareEmail = '';
+    }
+
+    public function shareTask()
+    {
+        $this->validate([
+            'shareEmail' => 'required|email|exists:users,email'
+        ]);
+
+        $task = Task::find($this->taskToShareId);
+        $userToShare = User::where('email', $this->shareEmail)->first();
+
+        // Validasi: Jangan share ke diri sendiri & Cek kepemilikan
+        if ($userToShare->id === Auth::id()) {
+            $this->addError('shareEmail', 'Anda tidak bisa share ke diri sendiri.');
+            return;
+        }
+
+        if ($task->user_id !== Auth::id()) {
+            session()->flash('error', 'Hanya pemilik yang bisa membagikan task.');
+            return;
+        }
+
+        // Action Share
+        try {
+            $task->sharedWith()->syncWithoutDetaching([
+                $userToShare->id => ['permission' => $this->sharePermission]
+            ]);
+
+            $this->shareModalOpen = false;
+            session()->flash('message', "Task berhasil dibagikan ke {$userToShare->name}");
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal membagikan task.');
+        }
+    }
+
+    public function removeShare($userId)
+    {
+        $task = Task::find($this->taskToShareId);
+        if ($task->user_id === Auth::id()) {
+            $task->sharedWith()->detach($userId);
+            // Refresh modal data logic if needed, or just let re-render happen
+        }
+    }
+
 
     // Computed Property untuk Stats
     public function getStatsProperty()
@@ -151,7 +221,8 @@ class DashboardManager extends Component
     {
         $task = Task::find($this->expandedTaskId);
 
-        if ($task && $task->user_id == Auth::id()) {
+        // Cek apakah pemilik ATAU punya akses edit
+        if ($task && ($task->user_id == Auth::id() || $task->canEdit(Auth::user()))) {
             $task->update([
                 'title' => $this->editForm['title'],
                 'description' => $this->editForm['description'],
@@ -159,10 +230,13 @@ class DashboardManager extends Component
                 'due_date' => $this->editForm['due_date'] ?: null,
             ]);
 
-            $this->expandedTaskId = null; // Tutup accordion
+            $this->expandedTaskId = null;
             session()->flash('message', 'Perubahan berhasil disimpan.');
+        } else {
+            session()->flash('error', 'Anda tidak memiliki izin edit.');
         }
     }
+
 
     public function deleteTask()
     {
@@ -191,9 +265,17 @@ class DashboardManager extends Component
     public function toggleStatus($taskId)
     {
         $task = Task::find($taskId);
-        if ($task && $task->user_id == Auth::id()) {
+
+        // LOGIC BARU:
+        // Cek apakah User adalah PEMILIK -ATAU- Punya akses EDIT via Share
+        if ($task && ($task->user_id == Auth::id() || $task->canEdit(Auth::user()))) {
+
             $task->status = $task->status === 'pending' ? 'completed' : 'pending';
             $task->save();
+
+        } else {
+            // Opsional: Beri notifikasi jika user 'View Only' mencoba klik
+            session()->flash('error', 'Anda hanya memiliki akses lihat (View Only).');
         }
     }
 
