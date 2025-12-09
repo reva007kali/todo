@@ -13,25 +13,11 @@
             <a class="flex items-center" href="{{ route('dashboard') }}" wire:navigate>
                 <x-app-logo />
             </a>
-            <flux:button x-data x-on:click="$flux.dark = ! $flux.dark" icon="moon" variant="subtle" aria-label="Toggle dark mode" />
+            <flux:button x-data x-on:click="$flux.dark = ! $flux.dark" icon="moon" variant="subtle"
+                aria-label="Toggle dark mode" />
         </div>
 
-        <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Platform')" class="grid">
-
-                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-
-                <flux:navlist.item icon="list-bullet" :href="route('tasks.index')"
-                    :current="request()->routeIs('tasks.index')" wire:navigate>{{ __('Task List') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="megaphone" :href="route('summary.index')"
-                    :current="request()->routeIs('summary.index')" wire:navigate>{{ __('Task Summary') }}
-                </flux:navlist.item>
-
-            </flux:navlist.group>
-        </flux:navlist>
+        @livewire('layout.sidebar')
 
         <flux:spacer />
 
@@ -136,13 +122,8 @@
     </flux:header>
 
     {{ $slot }}
-    <button id="notif-btn" style="display:none">Aktifkan Notifikasi</button>
-
-
 
     @fluxScripts
-
-
 </body>
 
 </html>

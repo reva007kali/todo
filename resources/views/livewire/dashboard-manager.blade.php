@@ -1,7 +1,7 @@
 <div class="min-h-screen text-zinc-900 dark:text-zinc-100 font-sans pb-20">
     <div class="max-w-4xl mx-auto space-y-10">
 
-        <!-- HEADER & STATS -->
+        <!-- HEADER & STATS (Tidak berubah) -->
         <div class="space-y-6">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
@@ -37,7 +37,7 @@
             </div>
         </div>
 
-        <!-- NEW: FILTER TABS (MY TASKS vs SHARED) -->
+        <!-- FILTER TABS -->
         <div class="flex justify-center">
             <div class="bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg flex gap-1">
                 <button wire:click="$set('viewFilter', 'my_tasks')"
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <!-- INPUT SECTION (AI & MANUAL TOGGLE) - HANYA MUNCUL DI MY TASKS -->
+        <!-- INPUT SECTION (AI & MANUAL TOGGLE) -->
         @if ($viewFilter == 'my_tasks')
             <div class="space-y-4">
                 <!-- AI Input -->
@@ -67,8 +67,15 @@
                                     class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
                                     Buat task baru dengan ai
                                 </label>
-                                <textarea wire:model="userPrompt" id="prompt" rows="2"
-                                    class="block focus:outline-none w-full border-0 bg-transparent p-0 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-600 focus:ring-0 sm:text-sm sm:leading-6 resize-none"
+                                <!-- MODIFIKASI: Textarea Auto-Resize & Shortcut -->
+                                <textarea wire:model="userPrompt" id="prompt" rows="1" x-data="{
+                                    resize() {
+                                        $el.style.height = 'auto';
+                                        $el.style.height = $el.scrollHeight + 'px'
+                                    }
+                                }" x-init="resize()"
+                                    @input="resize()" @keydown.meta.enter="$wire.processPrompt()" @keydown.ctrl.enter="$wire.processPrompt()"
+                                    class="block focus:outline-none w-full border-0 bg-transparent p-0 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-600 focus:ring-0 sm:text-sm sm:leading-6 resize-none overflow-hidden min-h-[50px]"
                                     placeholder="Contoh: Task Desain poster untuk social media untuk di posting besok!"></textarea>
                             </div>
                             <div
@@ -77,6 +84,10 @@
                                     <span
                                         class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/20">AI
                                         Ready</span>
+                                    <span class="text-[10px] text-zinc-400 hidden sm:inline">Tekan <kbd
+                                            class="font-sans px-1 border rounded bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600">Cmd</kbd>
+                                        + <kbd
+                                            class="font-sans px-1 border rounded bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600">Enter</kbd></span>
                                 </div>
                                 <button type="submit"
                                     class="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -129,8 +140,15 @@
                                 <div class="col-span-1 md:col-span-2">
                                     <label class="block p-3 text-xs font-medium text-zinc-500 mb-1">Deskripsi
                                         (Opsional)</label>
-                                    <textarea wire:model="createForm.description" rows="2"
-                                        class="w-full p-3 focus:outline-1 rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    <!-- MODIFIKASI: Manual Textarea Auto-Resize -->
+                                    <textarea wire:model="createForm.description" rows="1" x-data="{
+                                        resize() {
+                                            $el.style.height = 'auto';
+                                            $el.style.height = $el.scrollHeight + 'px'
+                                        }
+                                    }" x-init="resize()"
+                                        @input="resize()"
+                                        class="w-full p-3 focus:outline-1 rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 text-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none overflow-hidden"></textarea>
                                 </div>
                             </div>
                             <div class="flex justify-end">
@@ -145,11 +163,10 @@
             </div>
         @endif
 
-        <!-- TASK LIST (ACCORDION STYLE) -->
+        <!-- TASK LIST -->
         <div class="space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
                 <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Daftar Tugas</h2>
-                <!-- Helper Text -->
                 <p class="text-xs text-zinc-400 flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -180,14 +197,12 @@
                             <div class="p-4 flex items-start gap-4 cursor-pointer {{ $task->status == 'completed' ? 'bg-zinc-50 dark:bg-zinc-900/80' : '' }}"
                                 wire:click="toggleExpand({{ $task->id }})">
 
-                                <!-- Checkbox (Stop Propagation agar tidak trigger accordion) -->
                                 <div class="pt-1" wire:click.stop>
                                     <input type="checkbox" wire:click="toggleStatus({{ $task->id }})"
                                         {{ $task->status == 'completed' ? 'checked' : '' }}
                                         class="w-5 h-5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600 dark:border-zinc-600 dark:bg-zinc-800 cursor-pointer">
                                 </div>
 
-                                <!-- Main Content -->
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center justify-between gap-2 mb-1">
                                         <h3
@@ -195,27 +210,22 @@
                                             {{ $task->title }}
                                         </h3>
 
-                                        <!-- Badges & Tools -->
                                         <div class="flex items-center gap-2 shrink-0">
-                                            <!-- NEW: Shared Badge (Jika di tab Shared) -->
-                                            @if ($viewFilter == 'shared')
-                                                <span
-                                                    class="text-[10px] bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 flex items-center gap-1">
-                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                                        stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                    </svg>
-                                                    {{ substr($task->user->name, 0, 8) }}..
-                                                </span>
+                                            <!-- Share Icons & Badges logic (sama seperti sebelumnya) -->
+                                            @if ($task->sharedWith->isNotEmpty())
+                                                <div class="flex -space-x-1.5 mr-1" title="Shared with">
+                                                    @foreach ($task->sharedWith->take(3) as $sharedUser)
+                                                        <div
+                                                            class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 border border-white dark:border-zinc-900 flex items-center justify-center text-[8px] font-bold text-indigo-700 dark:text-indigo-300">
+                                                            {{ substr($sharedUser->name, 0, 1) }}
+                                                        </div>
+                                                    @endforeach
+                                                </div>
                                             @endif
 
-                                            <!-- NEW: Share Button (Hanya jika Pemilik) -->
                                             @if ($task->user_id == auth()->id())
                                                 <button wire:click.stop="openShareModal({{ $task->id }})"
-                                                    class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
-                                                    title="Bagikan Task">
+                                                    class="p-1 text-zinc-400 hover:text-indigo-600 transition">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                                         stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -230,7 +240,6 @@
                                                 {{ $task->priority }}
                                             </span>
 
-                                            <!-- Chevron Icon (Rotates when open) -->
                                             <svg class="w-5 h-5 text-zinc-400 transition-transform duration-200 {{ $expandedTaskId == $task->id ? 'rotate-180' : '' }}"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -239,7 +248,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Subtitle Preview -->
                                     <div class="space-y-2 text-zinc-500 dark:text-zinc-400">
                                         <h4 class="truncate w-[300px] text-sm lg:w-full ">{{ $task->description }}
                                         </h4>
@@ -262,82 +270,82 @@
                             <!-- Accordion Body (Editable Form) -->
                             @if ($expandedTaskId == $task->id)
                                 <div
-                                    class="bg-zinc-50 dark:bg-black/20 border-t border-zinc-100 dark:border-zinc-800 p-5 animate-fade-in">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span
-                                            class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Mode
-                                            Edit</span>
+                                    class="relative bg-zinc-50/80 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800 backdrop-blur-sm p-4 sm:p-6 animate-fade-in-down">
+                                    <div
+                                        class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent">
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <!-- Edit Title -->
-                                        <div class="col-span-1 md:col-span-2">
-                                            <label class="block text-xs font-medium text-zinc-500 mb-1">Judul</label>
+                                    <!-- Edit Title & Priority ... (Bagian atas sama) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6 mt-4">
+                                        <div class="col-span-1 sm:col-span-2 group">
+                                            <label class="block text-xs font-semibold text-zinc-500 mb-1.5 ml-1">Judul
+                                                Tugas</label>
                                             <input type="text" wire:model="editForm.title"
-                                                class="w-full p-3 rounded bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                                class="block w-full pl-3 pr-3 py-2.5 rounded-xl border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm shadow-sm">
                                         </div>
 
-                                        <!-- Edit Priority -->
-                                        <div>
+                                        <div class="group">
                                             <label
-                                                class="block text-xs font-medium text-zinc-500 mb-1">Prioritas</label>
+                                                class="block text-xs font-semibold text-zinc-500 mb-1.5 ml-1">Prioritas</label>
                                             <select wire:model="editForm.priority"
-                                                class="w-full p-3 rounded bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                                <option value="High">High</option>
-                                                <option value="Middle">Middle</option>
-                                                <option value="Low">Low</option>
+                                                class="block w-full py-2.5 rounded-xl border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm shadow-sm">
+                                                <option value="High">🔥 High Priority</option>
+                                                <option value="Middle">⚡ Middle Priority</option>
+                                                <option value="Low">☕ Low Priority</option>
                                             </select>
                                         </div>
 
-                                        <!-- Edit Due Date -->
-                                        <div>
-                                            <label class="block text-xs font-medium text-zinc-500 mb-1">Due
-                                                Date</label>
+                                        <div class="group">
+                                            <label
+                                                class="block text-xs font-semibold text-zinc-500 mb-1.5 ml-1">Tenggat
+                                                Waktu</label>
                                             <input type="datetime-local" wire:model="editForm.due_date"
-                                                class="w-full p-3 rounded bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-zinc-500">
+                                                class="block w-full py-2.5 rounded-xl border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm shadow-sm">
                                         </div>
 
-                                        <!-- Edit Description -->
-                                        <div class="col-span-1 md:col-span-2">
+                                        <!-- MODIFIKASI: Edit Description Textarea Auto-Resize -->
+                                        <div class="col-span-1 sm:col-span-2 group">
                                             <label
-                                                class="block text-xs font-medium text-zinc-500 mb-1">Deskripsi</label>
-                                            <textarea wire:model="editForm.description" rows="3"
-                                                class="w-full p-3 rounded bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                                class="block text-xs font-semibold text-zinc-500 mb-1.5 ml-1">Deskripsi
+                                                Tambahan</label>
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute top-3 left-3 flex items-start pointer-events-none text-zinc-400">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                                        stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7" />
+                                                    </svg>
+                                                </div>
+                                                <textarea wire:model="editForm.description" rows="1" x-data="{
+                                                    resize() {
+                                                        $el.style.height = 'auto';
+                                                        $el.style.height = $el.scrollHeight + 'px'
+                                                    }
+                                                }" x-init="resize()"
+                                                    @input="resize()"
+                                                    class="block w-full pl-10 pr-3 py-2.5 rounded-xl border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm shadow-sm placeholder:text-zinc-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 resize-none overflow-hidden leading-relaxed"
+                                                    placeholder="Tambahkan catatan detail..."></textarea>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Action Buttons -->
-                                    <div class="flex items-center justify-between pt-2">
-                                        <!-- Hapus Button: Hanya Muncul Jika Pemilik -->
+                                    <div
+                                        class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800/50 mt-2">
                                         @if ($task->user_id == auth()->id())
                                             <button wire:click="confirmDelete({{ $task->id }})" type="button"
-                                                class="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
+                                                class="w-full sm:w-auto text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl text-sm font-medium transition">
                                                 Hapus
                                             </button>
                                         @else
-                                            <span></span> <!-- Spacer agar tombol simpan tetap di kanan -->
+                                            <span></span>
                                         @endif
-
-                                        <div class="flex gap-2">
+                                        <div class="flex items-center gap-3 w-full sm:w-auto">
                                             <button wire:click="toggleExpand({{ $task->id }})"
-                                                class="px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 rounded-lg transition">
-                                                Batal
-                                            </button>
+                                                class="flex-1 sm:flex-none px-5 py-2.5 text-sm font-semibold bg-white dark:bg-zinc-800 border rounded-xl shadow-sm">Batal</button>
                                             <button wire:click="updateTask"
-                                                class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition flex items-center gap-2">
-                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="3" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Simpan Perubahan
-                                            </button>
+                                                class="flex-1 sm:flex-none px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md transition">Simpan</button>
                                         </div>
                                     </div>
                                 </div>
@@ -349,13 +357,13 @@
         </div>
     </div>
 
-    <!-- Notification Toast -->
+    <!-- Notification Toast (Tetap di pojok kanan bawah agar tidak menutupi konten tengah) -->
     @if (session()->has('message'))
         <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300"
             x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
-            class="fixed bottom-4 right-4 z-50 bg-zinc-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3">
+            class="fixed bottom-4 right-4 z-[1000] bg-zinc-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3">
             <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -370,7 +378,7 @@
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300"
             x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
-            class="fixed bottom-4 right-4 z-50 bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3">
+            class="fixed bottom-4 right-4 z-[1000] bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3">
             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -380,17 +388,20 @@
     @endif
 
 
-    <!-- DELETE CONFIRMATION MODAL -->
+    <!-- DELETE CONFIRMATION MODAL (CENTERED) -->
     @if ($confirmingDeleteId)
         <div class="relative z-[999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <!-- Background Backdrop -->
             <div class="fixed inset-0 bg-zinc-900/70 backdrop-blur-sm transition-opacity" x-data
                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-zinc-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-zinc-200 dark:border-zinc-800"
+                <!-- UPDATED: items-center (was items-end) & justify-center -->
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+
+                    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-zinc-900 text-left shadow-xl transition-all w-full max-w-md border border-zinc-200 dark:border-zinc-800"
                         x-data @click.outside="$wire.cancelDelete()" @keydown.escape.window="$wire.cancelDelete()"
                         x-transition:enter="ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -398,6 +409,7 @@
                         x-transition:leave="ease-in duration-200"
                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+
                         <div class="bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
                                 <div
@@ -440,9 +452,10 @@
         </div>
     @endif
 
-    <!-- NEW: SHARE MODAL -->
+    <!-- NEW: SHARE MODAL (CENTERED) -->
     @if ($shareModalOpen)
         <div class="relative z-[999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <!-- Background Backdrop -->
             <div class="fixed inset-0 bg-zinc-900/70 backdrop-blur-sm transition-opacity" x-data
                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
@@ -450,8 +463,10 @@
                 wire:click="$set('shareModalOpen', false)"></div>
 
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-zinc-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-zinc-200 dark:border-zinc-800"
+                <!-- UPDATED: items-center (was items-end) & justify-center -->
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+
+                    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-zinc-900 text-left shadow-xl transition-all w-full max-w-lg border border-zinc-200 dark:border-zinc-800"
                         x-transition:enter="ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
