@@ -46,6 +46,8 @@ class DashboardManager extends Component
                        ELSE 4 
                    END
                ")
+            ->orderByRaw("CASE WHEN status = 'completed' THEN 1 ELSE 0 END")
+            // 3. KETIGA: Urutkan berdasarkan tanggal pembuatan terbaru
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -163,14 +165,14 @@ class DashboardManager extends Component
         }
     }
 
-     public function deleteTask()
+    public function deleteTask()
     {
         if ($this->confirmingDeleteId) {
             $task = Task::find($this->confirmingDeleteId);
-            
+
             if ($task && $task->user_id == Auth::id()) {
                 $task->delete();
-                
+
                 // Jika task yang dihapus sedang dalam mode edit (expanded), tutup accordion-nya
                 if ($this->expandedTaskId == $this->confirmingDeleteId) {
                     $this->expandedTaskId = null;
