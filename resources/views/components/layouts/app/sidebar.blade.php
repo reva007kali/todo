@@ -123,10 +123,6 @@
 
     {{ $slot }}
 
-    @auth
-        <x-push-toggle />
-    @endauth
-
     @fluxScripts
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
