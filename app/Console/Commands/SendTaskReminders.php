@@ -2,32 +2,17 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Console\Command;
 use App\Notifications\TaskReminder;
+use Carbon\Carbon;
 
 class SendTaskReminders extends Command
 {
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'tasks:remind';
-
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Cek deadline tugas dan kirim notifikasi PWA';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $this->info('Memulai pengecekan tugas...');
@@ -45,7 +30,7 @@ class SendTaskReminders extends Command
         foreach ($tasks as $task) {
             // Cek logik sederhana agar tidak spam notif berkali-kali (opsional: tambah kolom 'notified_at' di DB)
             // Di sini kita kirim saja sebagai contoh
-            
+
             try {
                 $task->user->notify(new TaskReminder(
                     "⏳ Segera Jatuh Tempo!",
@@ -62,10 +47,10 @@ class SendTaskReminders extends Command
         // Kita cek jam sekarang, jika jam 7 pagi, jalankan blast
         if (now()->format('H:i') == '07:00') {
             $users = User::whereHas('pushSubscriptions')->get();
-            
+
             foreach ($users as $user) {
                 $pendingCount = $user->tasks()->where('status', 'pending')->count();
-                
+
                 if ($pendingCount > 0) {
                     $user->notify(new TaskReminder(
                         "🌞 Semangat Pagi, {$user->name}!",

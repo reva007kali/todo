@@ -2,6 +2,8 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+
 
 // Jalankan setiap menit agar akurat menangkap deadline
 Schedule::command('tasks:remind')->everyMinute();
