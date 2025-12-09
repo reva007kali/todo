@@ -129,15 +129,55 @@
 
     @fluxScripts
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('ServiceWorker registration successful');
-                    }, function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log("Browser tidak mendukung WebPush");
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log("SW registered", registration);
+
+            // Minta izin notifikasi
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                console.log("User tidak memberi izin notifikasi");
+                return;
+            }
+
+            // Cek subscription eksisting
+            let subscription = await registration.pushManager.getSubscription();
+
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(window.VAPID_PUBLIC_KEY),
+                });
+            }
+
+            // Kirim subscription ke server
+            await fetch("/api/push-subscribe", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(subscription)
             });
+
+            console.log("Subscription dikirim ke server");
+        });
+
+        // helper untuk convert VAPID key
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
         }
     </script>
 </body>

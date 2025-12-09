@@ -1,4 +1,4 @@
-<div x-data="pushNotification()" x-init="init()" class="fixed bottom-4 right-4 z-50">
+<div x-data="pushNotification()" class="fixed bottom-4 right-4 z-50">
     <!-- Tombol hanya muncul jika support SW dan belum subscribe -->
     <button x-show="isSupported && !isSubscribed" 
             @click="subscribe"
